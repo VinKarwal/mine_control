@@ -174,7 +174,7 @@ class _VehicleRegistrationScreenState extends State<VehicleRegistrationScreen> {
                                 .collection('Vehicle');
 
                             // Add a new document to the 'Vehicles' collection
-                            await vehicles.add({
+                            await vehicles.doc(_deviceIdController.text).set({
                               'deviceId': _deviceIdController.text,
                               'vehicleCategory':
                                   _vehicleCategoryController.text,

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mine_control/components/custom_appbar.dart';
-import 'package:mine_control/components/drawer.dart';
 import 'package:mine_control/models/data_model.dart';
 import 'package:mine_control/screens/register_driver_screen.dart';
 
@@ -17,8 +15,18 @@ class _DriverPageState extends State<DriverPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
-      drawer: DrawerCustom(),
+      appBar: AppBar(
+        title: const Text("Driver Details"),
+        elevation: 20,
+        backgroundColor: Colors.grey[900],
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       backgroundColor: Colors.grey[300],
       body: ListView.builder(
         itemCount: drivers.length,
@@ -42,8 +50,8 @@ class _DriverPageState extends State<DriverPage> {
               ),
               subtitle: Text(
                   'License Number: ${drivers[index]['licenseNumber']}',
-                  style: TextStyle(color: Colors.white54)),
-              trailing: Icon(Icons.arrow_forward_ios),
+                  style: const TextStyle(color: Colors.white54)),
+              trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
                 // Navigate to driver details page
               },
@@ -56,9 +64,9 @@ class _DriverPageState extends State<DriverPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => DriverRegistrationScreen()));
+                  builder: (context) => const DriverRegistrationScreen()));
         },
-        child: Icon(
+        child: const Icon(
           Icons.add,
           color: Colors.white,
         ),

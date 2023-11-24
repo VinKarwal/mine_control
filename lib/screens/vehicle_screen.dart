@@ -1,11 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter_sms/flutter_sms.dart';
-import 'package:mine_control/components/custom_appbar.dart';
-import 'package:mine_control/components/drawer.dart';
 import 'package:mine_control/components/text_field.dart';
-import 'package:mine_control/models/data_model.dart';
 import 'package:mine_control/screens/register_vehicle_screen.dart';
 
 class VehiclePage extends StatefulWidget {
@@ -16,36 +12,33 @@ class VehiclePage extends StatefulWidget {
 }
 
 class _VehiclePageState extends State<VehiclePage> {
-  // final List<Map<String, dynamic>> vehicles = DemoData.vehicles;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  // void immobilizeVehicle() async {
-  //   String message =
-  //       'The vehicle has been immobilized due to suspicious activities.';
-  //   List<String> recipients = ['8847252495'];
-
-  //   String result = await sendSMS(message: message, recipients: recipients)
-  //       .catchError((onError) {
-  //     print(onError);
-  //   });
-  //   print(result);
-  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
-      drawer: const DrawerCustom(),
+      appBar: AppBar(
+        title: const Text("Vehicle Details"),
+        elevation: 20,
+        backgroundColor: Colors.grey[900],
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       backgroundColor: Colors.grey[300],
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore.collection('Vehicle').snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Text('Something went wrong');
+            return const Text('Something went wrong');
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
 
           List<QueryDocumentSnapshot> vehicles = snapshot.data!.docs;

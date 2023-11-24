@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mine_control/auth/auth_page.dart';
+import 'package:mine_control/screens/audit_screen.dart';
 import 'package:mine_control/screens/driver_screen.dart';
-import 'package:mine_control/screens/home_screen.dart';
 import 'package:mine_control/screens/vehicle_screen.dart';
 
 class DrawerCustom extends StatelessWidget {
@@ -38,23 +38,11 @@ class DrawerCustom extends StatelessWidget {
           Column(
             children: <Widget>[
               ListTile(
-                leading: const Icon(Icons.home),
-                title: const Text('Home'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
-                  );
-                },
-              ),
-              const Divider(),
-              ListTile(
                 leading: const Icon(Icons.directions_car),
                 title: const Text('Vehicle Data'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const VehiclePage()),
@@ -67,9 +55,22 @@ class DrawerCustom extends StatelessWidget {
                 title: const Text('Driver Data'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const DriverPage()),
+                  );
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.receipt_long),
+                title: const Text('Logs/Audit'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AuditScreen()),
                   );
                 },
               ),
