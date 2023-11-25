@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 
 class AuditScreen extends StatefulWidget {
@@ -9,6 +12,28 @@ class AuditScreen extends StatefulWidget {
 }
 
 class _AuditScreenState extends State<AuditScreen> {
+  Future<File> saveAsCSV(List<Map<String, dynamic>> data) async {
+    List<List<dynamic>> rows = [];
+
+    rows.add(['Timestamp', 'Vehicle Number', 'Vehicle Warning', 'Time Period']);
+
+    for (Map<String, dynamic> row in data) {
+      rows.add([
+        row['timestamp'],
+        row['vehicleNum'],
+        row['warning'],
+        row['timePeriod']
+      ]);
+    }
+
+    String csv = const ListToCsvConverter().convert(rows);
+
+    String downloadDirPath = '/storage/emulated/0/Download';
+    File file = File("$downloadDirPath/Logs.csv");
+    print("Path: $downloadDirPath");
+    return file.writeAsString(csv);
+  }
+
   Future<List<Map<String, dynamic>>> fetchData() async {
     QuerySnapshot querySnapshot =
         await FirebaseFirestore.instance.collection('Logs').get();
@@ -44,15 +69,17 @@ class _AuditScreenState extends State<AuditScreen> {
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 columns: const [
-                  DataColumn(label: Text('Time')),
+                  DataColumn(label: Text('Timestamp')),
                   DataColumn(label: Text('Vehicle Number')),
                   DataColumn(label: Text('Vehicle Warning')),
+                  DataColumn(label: Text('Time Period')),
                 ],
                 rows: snapshot.data!.map((row) {
                   return DataRow(cells: [
                     DataCell(Text(row['timestamp'].toString())),
                     DataCell(Text(row['vehicleNum'].toString())),
                     DataCell(Text(row['warning'].toString())),
+                    DataCell(Text(row['timePeriod'].toString())),
                   ]);
                 }).toList(),
               ),
@@ -62,8 +89,22 @@ class _AuditScreenState extends State<AuditScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         foregroundColor: Colors.white,
-        backgroundColor: Colors.blue[600],
-        onPressed: () {},
+        backgroundColor: Colors.grey[900],
+        onPressed: () async {
+          try {
+            PermissionStatus status = await Permission.storage.status;
+            print('Permission status: $status');
+            if (!status.isGranted) {
+              await Permission.storage.request();
+            }
+            List<Map<String, dynamic>> data = await fetchData();
+            print('Fetched data: $data');
+            await saveAsCSV(data);
+            print('Data saved as CSV');
+          } catch (e) {
+            print('Error: $e');
+          }
+        },
         label: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

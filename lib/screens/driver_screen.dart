@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mine_control/models/data_model.dart';
 import 'package:mine_control/screens/register_driver_screen.dart';
@@ -28,35 +29,46 @@ class _DriverPageState extends State<DriverPage> {
         ),
       ),
       backgroundColor: Colors.grey[300],
-      body: ListView.builder(
-        itemCount: drivers.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            color: Colors.grey[900],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            elevation: 5,
-            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: ListTile(
-              leading: CircleAvatar(
-                child: Text(drivers[index]['name'][0]),
-              ),
-              //bold text
-              title: Text(
-                drivers[index]['name'],
-                style: const TextStyle(
-                    color: Colors.white54, fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                  'License Number: ${drivers[index]['licenseNumber']}',
-                  style: const TextStyle(color: Colors.white54)),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                // Navigate to driver details page
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('Drivers').snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.docs.length,
+              itemBuilder: (BuildContext context, int index) {
+                var driver = snapshot.data!.docs[index];
+                return Card(
+                  color: Colors.grey[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 5,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      child: Text(driver['name'][0]),
+                    ),
+                    title: Text(
+                      driver['name'],
+                      style: const TextStyle(
+                          color: Colors.white54, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text('License Number: ${driver['license']}',
+                        style: const TextStyle(color: Colors.white54)),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      // Navigate to driver details page
+                    },
+                  ),
+                );
               },
-            ),
-          );
+            );
+          }
         },
       ),
       floatingActionButton: FloatingActionButton(

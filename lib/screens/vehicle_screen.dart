@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mine_control/components/text_field.dart';
 import 'package:mine_control/screens/register_vehicle_screen.dart';
 
@@ -61,8 +62,9 @@ class _VehiclePageState extends State<VehiclePage> {
                       return StatefulBuilder(
                         builder: (context, setState) {
                           return AlertDialog(
-                            title: const Text('Kill Switch',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            title: Text('Kill Switch',
+                                style: GoogleFonts.roboto(
+                                    fontWeight: FontWeight.bold)),
                             content: SingleChildScrollView(
                               child: Column(
                                 children: [
@@ -100,7 +102,7 @@ class _VehiclePageState extends State<VehiclePage> {
                                         FirebaseDatabase.instance
                                             .ref()
                                             .child(
-                                                "/${vehicle['licensePlateNumber'].toString()}/vehiclecontrol")
+                                                "Markers/${vehicle['licensePlateNumber'].toString()}/power")
                                             .set(switchValue);
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
@@ -148,28 +150,130 @@ class _VehiclePageState extends State<VehiclePage> {
                   margin:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: ListTile(
-                    leading: Image.asset(
-                      "lib/assets/dump-truck(3).png",
-                    ),
-                    title: Text(
-                      '${vehicle['deviceId']} ${vehicle['vehicleCategory']} (${vehicle['licensePlateNumber'].toString()})',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                    title: Column(
+                      children: [
+                        Image.asset(
+                          "lib/assets/dump-truck(3).png",
+                          height: 100,
+                        ),
+                        Text(
+                          '${vehicle['licensePlateNumber']} (${vehicle['deviceId'].toString()})',
+                          style: GoogleFonts.roboto(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                     subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        const Divider(
-                          color: Colors.white54,
-                          thickness: 2,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                                'Retention Policy: ${vehicle['retentionPolicy']}',
+                                style: GoogleFonts.roboto(color: Colors.white)),
+                            Text('Route: ${vehicle['routeName']}',
+                                style: GoogleFonts.roboto(color: Colors.white)),
+                            const Divider(
+                              color: Colors.white54,
+                              thickness: 2,
+                            ),
+                          ],
                         ),
-                        Text('Retention Policy: ${vehicle['retentionPolicy']}',
-                            style: const TextStyle(color: Colors.white)),
-                        Text('Route: ${vehicle['routeName']}',
-                            style: const TextStyle(color: Colors.white)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            FutureBuilder<DatabaseEvent>(
+                              future: FirebaseDatabase.instance
+                                  .ref()
+                                  .child(
+                                      'Markers/${vehicle['licensePlateNumber']}')
+                                  .once(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<DatabaseEvent> snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                } else {
+                                  if (snapshot.hasData) {
+                                    DataSnapshot dataSnapshot =
+                                        snapshot.data!.snapshot;
+                                    if (dataSnapshot.value is Map) {
+                                      Map<String, dynamic> data =
+                                          Map<String, dynamic>.from(dataSnapshot
+                                              .value as Map<dynamic, dynamic>);
+
+                                      String speed = data['speed'].toString();
+                                      String distance = data['dis'].toString();
+                                      String totalDistance =
+                                          data['totalDis'].toString();
+                                      String todayDistance =
+                                          data['todayDis'].toString();
+                                      String weight = data['weight'].toString();
+
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Text(
+                                            'Total Distance Travelled: $totalDistance',
+                                            style: GoogleFonts.roboto(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Distance Travelled Today: $todayDistance',
+                                            style: GoogleFonts.roboto(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Speed: $speed (Max. 80km/h)',
+                                            style: GoogleFonts.roboto(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Distance: $distance',
+                                            style: GoogleFonts.roboto(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Weight: $weight',
+                                            style: GoogleFonts.roboto(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return Text('No data',
+                                          style: GoogleFonts.roboto(
+                                              color: Colors.white));
+                                    }
+                                  } else {
+                                    return Text('No data',
+                                        style: GoogleFonts.roboto(
+                                            color: Colors.white));
+                                  }
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),

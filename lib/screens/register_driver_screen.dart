@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../components/text_field.dart';
@@ -47,7 +48,7 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     RegisterTextField(
                       controller: _nameController,
@@ -129,22 +130,26 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                     const SizedBox(height: 50.0),
                     TextButton(
                       onPressed: () async {
-                        // if (_formKey.currentState!.validate()) {
-                        // _formKey.currentState!.save();
-                        // _registrationTimestamp = DateTime.now();
-                        //   final vehicle = Vehicle(
-                        //     make: _makeController.text,
-                        //     model: _vehicleCategoryController.text,
-                        //     year: int.parse(_licensePlateNumberController.text),
-                        //     licensePlate: _retentionPolicyController.text,
-                        //     ownerName: _ownerNameController.text,
-                        //     phoneNumber: _phoneNumberController.text,
-                        //   );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Driver added successfully')),
-                        );
-                        Navigator.pop(context);
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          await FirebaseFirestore.instance
+                              .collection('Drivers')
+                              .add({
+                            'name': _nameController.text,
+                            'license': _licenseController.text,
+                            'expiry': _expiryController.text,
+                            'dob': _dobController.text,
+                            'address': _addressController.text,
+                            'contact': _contactController.text,
+                          });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Driver added successfully')),
+                          );
+
+                          Navigator.pop(context);
+                        }
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,

@@ -153,3 +153,24 @@ List<LatLng> polyPoints4 = [
   const LatLng(24.343674, 72.877235),
   const LatLng(24.343381, 72.877417)
 ];
+
+List<LatLng> checkpoint1 = [
+  const LatLng(24.334555, 72.875053),
+  const LatLng(24.335014, 72.875692),
+  const LatLng(24.334310, 72.876454),
+  const LatLng(24.333800, 72.875939),
+];
+
+List<LatLng> checkpoint2 = [
+  const LatLng(24.331665, 72.869650),
+  const LatLng(24.332058, 72.870158),
+  const LatLng(24.331417, 72.870547),
+  const LatLng(24.331126, 72.869963),
+];
+
+List<LatLng> checkpoint3 = [
+  const LatLng(24.329376, 72.866346),
+  const LatLng(24.329577, 72.866727),
+  const LatLng(24.329140, 72.867094),
+  const LatLng(24.328896, 72.866670),
+];

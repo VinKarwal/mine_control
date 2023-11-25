@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/models.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:geolocator/geolocator.dart';
 
 class MapScreen extends StatefulWidget {
   final bool showBackButton;
@@ -21,9 +22,27 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     addIcon();
-    // updateMarker();
+    updateMarker();
     _loadMarkers();
+    databaseReference
+        .child('Markers/UP22XY0002')
+        .onChildChanged
+        .listen((event) {
+      _addOrUpdateMarker(event.snapshot);
+    });
     super.initState();
+  }
+
+  void updateMarker() {
+    Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high, distanceFilter: 10),
+    ).listen((Position position) {
+      databaseReference.child('Markers/UP22XY0002').update({
+        'lat': position.latitude,
+        'long': position.longitude,
+      });
+    });
   }
 
   void _loadMarkers() {
@@ -42,6 +61,7 @@ class _MapScreenState extends State<MapScreen> {
     double lat = values['lat'];
     double lng = values['long'];
     String markerId = snapshot.key!;
+    int missedCheckpoint = values['missed'];
     String vehicleStatus = values['vehiclestatus'];
 
     setState(() {
@@ -53,26 +73,37 @@ class _MapScreenState extends State<MapScreen> {
       );
 
       if (_previousStatus[markerId] == 'Inside' && vehicleStatus == 'Outside') {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            Future.delayed(Duration(seconds: 3), () {
-              Navigator.of(context).pop();
-            });
-            return AlertDialog(
-              title: Text(
-                'Alert!',
-                style: TextStyle(
-                    color: Colors.red[800], fontWeight: FontWeight.bold),
-              ),
-              content: Text(
-                '$markerId is outside the fence',
-              ),
-            );
-          },
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.warning, color: Colors.white),
+                const SizedBox(width: 10),
+                Text('$markerId is outside the fence'),
+              ],
+            ),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Colors.yellow[800],
+          ),
         );
       }
       _previousStatus[markerId] = vehicleStatus;
+
+      if (missedCheckpoint > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 10),
+                Text('$markerId Missed checkpoint: $missedCheckpoint'),
+              ],
+            ),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Colors.red[800],
+          ),
+        );
+      }
     });
   }
 
@@ -127,6 +158,27 @@ class _MapScreenState extends State<MapScreen> {
                 fillColor: Colors.brown.withOpacity(0.2),
                 strokeColor: Colors.brown,
               ),
+              Polygon(
+                polygonId: const PolygonId("#4"),
+                points: checkpoint1,
+                strokeWidth: 2,
+                fillColor: Colors.brown.withOpacity(0.2),
+                strokeColor: Colors.brown,
+              ),
+              Polygon(
+                polygonId: const PolygonId("#4"),
+                points: checkpoint2,
+                strokeWidth: 2,
+                fillColor: Colors.brown.withOpacity(0.2),
+                strokeColor: Colors.brown,
+              ),
+              Polygon(
+                polygonId: const PolygonId("#4"),
+                points: checkpoint3,
+                strokeWidth: 2,
+                fillColor: Colors.brown.withOpacity(0.2),
+                strokeColor: Colors.brown,
+              ),
             },
           ),
           if (widget.showBackButton)
@@ -135,7 +187,7 @@ class _MapScreenState extends State<MapScreen> {
               left: 10.0,
               child: IconButton(
                 icon: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
@@ -148,7 +200,7 @@ class _MapScreenState extends State<MapScreen> {
                               const Offset(2, 3), // changes position of shadow
                         ),
                       ]),
-                  child: Icon(
+                  child: const Icon(
                     Icons.arrow_back_ios_new_rounded,
                     color: Colors.black,
                   ),

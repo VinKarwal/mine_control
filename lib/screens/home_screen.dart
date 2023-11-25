@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mine_control/components/drawer.dart';
 import 'package:mine_control/screens/map_screen.dart';
 
@@ -58,7 +60,7 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       PageRouteBuilder(
-                        transitionDuration: const Duration(seconds: 1),
+                        transitionDuration: const Duration(milliseconds: 500),
                         pageBuilder: (_, __, ___) =>
                             const MapScreen(showBackButton: true),
                         transitionsBuilder: (_, animation, __, child) {
@@ -104,9 +106,97 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: 
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10)),
+                child: Container(
+                  height: 400,
+                  child: FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('Overall')
+                        .doc('jwBdfrKMU8OZqjk8bY5f')
+                        .get(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<DocumentSnapshot> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        Map<String, dynamic> data =
+                            snapshot.data!.data() as Map<String, dynamic>;
+                        return Card(
+                          color: Colors.grey[600],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Image.network(
+                                        'https://cdn1.iconfinder.com/data/icons/cryptocurrency-blockchain-fintech/32/Cryptocurrency_mining-08-64.png'),
+                                    SizedBox(width: 35),
+                                    Text(
+                                      'Overall Data',
+                                      style: GoogleFonts.sen(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                                Divider(color: Colors.white),
+                                SizedBox(height: 10),
+                                Text(
+                                  '◓ Checkpoints: ${data['checkpoints']}',
+                                  style: GoogleFonts.sen(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  '◓ Fences: ${data['fences']}',
+                                  style: GoogleFonts.sen(
+                                      color: Colors.white, fontSize: 18),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  '◓ Total Distance: ${data['totalDis']}',
+                                  style: GoogleFonts.sen(
+                                      color: Colors.white, fontSize: 18),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  '◓ Total Today: ${data['totalToday']}',
+                                  style: GoogleFonts.sen(
+                                      color: Colors.white, fontSize: 18),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  '◓ Working Drivers: ${data['workingDrivers']}',
+                                  style: GoogleFonts.sen(
+                                      color: Colors.white, fontSize: 18),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  '◓ Working Vehicles: ${data['workingVehicles']}',
+                                  style: GoogleFonts.sen(
+                                      color: Colors.white, fontSize: 18),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
               ),
             ),
           ],
